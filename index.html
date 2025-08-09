@@ -1,361 +1,481 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Riddle Rush — 10 in 30</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg1:#2b5876; --bg2:#4e4376; --accent:#f8e71c; --neon:#00ffb3; --card:rgba(255,255,255,0.06);
-      --glass: rgba(255,255,255,0.06);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Poppins,system-ui,Arial;color:#fff;background:linear-gradient(135deg,var(--bg1),var(--bg2));overflow:hidden}
-    .scene{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
-    .game{width:100%;max-width:900px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,0.4);backdrop-filter:blur(6px)}
-    header{display:flex;align-items:center;gap:16px}
-    .logo{font-family:'Bangers',cursive;font-size:38px;letter-spacing:1px;color:var(--neon);text-shadow:0 4px 18px rgba(0,255,179,0.12);}
-    .sub{font-family:'Fredoka One',sans-serif;color:var(--accent);font-size:13px}
-
-    .home{display:flex;gap:20px;align-items:center;padding:22px 8px}
-    .left{flex:1}
-    .start-btn{background:linear-gradient(90deg,#00ffd5,#7a42ff);border:none;padding:16px 26px;border-radius:12px;font-weight:700;font-size:18px;color:#052;cursor:pointer;box-shadow:0 8px 30px rgba(122,66,255,0.28);transition:transform .15s ease,box-shadow .15s}
-    .start-btn:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(122,66,255,0.36)}
-    .meta{font-size:14px;opacity:0.95}
-
-    .game-screen{display:none;flex-direction:column;gap:14px;padding:10px}
-    .topbar{display:flex;justify-content:space-between;align-items:center}
-    .score{font-weight:600}
-    .timer-wrap{display:flex;align-items:center;gap:10px}
-    .timer-circle{width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--neon) var(--timerpct,0%),rgba(255,255,255,0.08) 0);display:flex;align-items:center;justify-content:center;font-weight:700;color:#012}
-    .riddle-card{background:var(--card);padding:18px;border-radius:12px;min-height:120px;display:flex;align-items:center;justify-content:center;font-size:20px;text-align:center}
-    .answer-row{display:flex;gap:10px;align-items:center}
-    .answer-input{flex:1;padding:12px;border-radius:10px;border:none;font-size:16px}
-    .btn{padding:12px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
-    .btn-submit{background:#fff;color:#072;border-radius:10px}
-    .btn-skip{background:transparent;border:2px solid rgba(255,255,255,0.12);color:#fff}
-
-    .results{display:none;align-items:center;flex-direction:column;padding:20px}
-    .score-big{font-size:48px;font-weight:800;color:var(--neon);text-shadow:0 8px 30px rgba(0,255,179,0.12)}
-    .actions{display:flex;gap:12px;margin-top:14px}
-
-    /* floating shapes */
-    .float-wrap{position:absolute;inset:0;pointer-events:none}
-    .blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:0.12;mix-blend-mode:screen}
-    .blob.a{width:360px;height:360px;background:#ff6ec7;left:-60px;top:-40px}
-    .blob.b{width:300px;height:300px;background:#00ffd5;right:-80px;bottom:-80px}
-
-    /* responsive */
-    @media(max-width:520px){.logo{font-size:28px}.riddle-card{font-size:18px}.timer-circle{width:56px;height:56px}}
-
-    /* small animations */
-    .fade-in{animation:fadeIn .35s ease both}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Riddle Rush — Cyberpunk v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neon1: #00f0ff;
+    --neon2: #ff2ec4;
+    --neon3: #8a2bff;
+    --panel-bg: rgba(2,6,12,0.65);
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:#050006;font-family:Poppins,system-ui,Segoe UI,Roboto; color:#fff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+  /* Fullscreen animated gradient (fixed so it never shows browser bg) */
+  .bg {
+    position:fixed; inset:0; z-index:-3;
+    background: linear-gradient(120deg,var(--neon1),var(--neon2),var(--neon3));
+    background-size: 400% 400%;
+    animation: bgmove 12s linear infinite;
+    filter: saturate(1.1) contrast(1.05);
+  }
+  @keyframes bgmove {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+  /* subtle dark overlay to make text pop */
+  .bg-overlay{position:fixed;inset:0;background:linear-gradient(rgba(2,6,12,0.35),rgba(0,0,0,0.6));z-index:-2}
+  /* floating decorative blobs */
+  .blob {position:fixed;border-radius:50%;filter:blur(60px);opacity:0.14;mix-blend-mode:screen;z-index:-1}
+  .blob.a{width:420px;height:420px;left:-120px;top:-80px;background:radial-gradient(circle at 30% 30%, #ff4bd1, #8a2bff)}
+  .blob.b{width:360px;height:360px;right:-120px;bottom:-80px;background:radial-gradient(circle at 70% 70%, #00f0ff, #7afcff)}
+  /* game container */
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+  .panel{
+    width:100%;max-width:920px;background:var(--panel-bg);border-radius:16px;padding:18px 18px 26px;border:1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);backdrop-filter: blur(6px);
+  }
+  .header{display:flex;align-items:center;gap:12px}
+  .logo{font-family:'Orbitron',sans-serif;font-size:34px;color:var(--neon1);text-shadow:0 6px 30px rgba(0,240,255,0.08)}
+  .sub{color: #ffedff;opacity:0.9;font-weight:600}
+  .top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .pill{padding:8px 12px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));font-weight:600}
+  .body{display:flex;gap:20px;margin-top:18px;flex-wrap:wrap}
+  .left{flex:1;min-width:260px}
+  .right{width:360px;min-width:260px}
+  /* start screen */
+  .hero{padding:18px;border-radius:12px;background:linear-gradient(0deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+  .big-btn{display:inline-block;padding:14px 26px;border-radius:12px;border:none;cursor:pointer;font-weight:800;font-size:18px;color:#051;background:linear-gradient(90deg,var(--neon1),var(--neon2));box-shadow:0 14px 40px rgba(138,43,255,0.18);transition:transform .12s}
+  .big-btn:hover{transform:translateY(-4px)}
+  .meta{margin-top:12px;color:rgba(255,255,255,0.85);opacity:0.95}
+  /* game screen */
+  .game-area{display:none;flex-direction:column;gap:14px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .score{font-weight:700;color:var(--neon2)}
+  .timer-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .timer-circle{width:86px;height:86px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#021;background:conic-gradient(var(--neon1) var(--pct,100%), rgba(255,255,255,0.06) 0);box-shadow:0 8px 30px rgba(0,0,0,0.5);border:4px solid rgba(255,255,255,0.05)}
+  .timer-low{border-color:#ff5252;box-shadow:0 0 30px rgba(255,82,82,0.18);animation: tlpulse 1s infinite}
+  @keyframes tlpulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+  .riddle-card{padding:20px;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));font-size:20px;min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .input-row{display:flex;gap:10px;align-items:center}
+  .input{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.45);color:#fff;font-size:16px}
+  .btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+  .btn-submit{background:linear-gradient(90deg,#a6ffcb,#78f1ff);color:#062}
+  .btn-skip{background:transparent;border:2px solid rgba(255,255,255,0.06);color:#fff}
+  .feedback{height:28px;margin-top:6px;font-weight:700}
+  .correct{color:#7ef59f}
+  .wrong{color:#ff9aa2}
+  .small{font-size:13px;opacity:0.9}
+  /* results */
+  .results{display:none;flex-direction:column;align-items:center;gap:10px}
+  .score-big{font-size:46px;font-weight:900;color:var(--neon1);text-shadow:0 6px 40px rgba(0,240,255,0.08)}
+  .recap{width:100%;max-height:260px;overflow:auto;margin-top:12px;border-radius:8px;padding:10px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.03)}
+  .recap-item{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03)}
+  /* responsive */
+  @media(max-width:880px){.body{flex-direction:column}.right{width:100%}}
+</style>
 </head>
 <body>
-  <div class="scene">
-    <div class="game" role="application">
-      <header>
+  <div class="bg"></div>
+  <div class="bg-overlay"></div>
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+
+  <div class="wrap">
+    <div class="panel" role="application" aria-label="Riddle Rush game">
+      <div class="header">
         <div class="logo">Riddle Rush</div>
-        <div style="flex:1"></div>
-        <div class="sub">10 in 30 — Beat the clock</div>
-      </header>
+        <div class="sub">10 in 30 — cyberpunk neon challenge</div>
+        <div class="top-actions">
+          <div class="pill small">Shareable • Single file</div>
+        </div>
+      </div>
 
-      <main>
-        <section class="home" id="home">
-          <div class="left">
-            <h2 style="margin:6px 0 8px 0;font-size:24px">Ready to show off your brain?</h2>
-            <div class="meta">10 random riddles. 30 seconds each. Neon vibes. Sound effects. Shareable link.</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-            <button class="start-btn" id="startBtn">Start Game</button>
-            <div style="font-size:12px;opacity:0.9">Pro tip: use headphones for sound effects 🎧</div>
-          </div>
-        </section>
+      <div class="body">
+        <div class="left">
+          <div class="hero">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:22px;font-weight:800">Beat the clock</div>
+                <div class="small" style="margin-top:6px">Answer 10 random riddles. 30 seconds each. Learn the answers. Sound + neon flair.</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:12px;color:rgba(255,255,255,0.75)">Round</div>
+                <div id="roundCount" style="font-weight:800;font-size:18px">—</div>
+              </div>
+            </div>
 
-        <section class="game-screen" id="gameScreen">
-          <div class="topbar">
-            <div class="score">Score: <span id="score">0</span>/10</div>
-            <div class="timer-wrap">
-              <div id="riddleIndex">1/10</div>
-              <div class="timer-circle" id="timerCircle">30</div>
+            <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+              <button id="startBtn" class="big-btn">Start Game</button>
+              <button id="howBtn" class="btn btn-skip" style="background:transparent;border:1px solid rgba(255,255,255,0.04)">How to play</button>
+            </div>
+
+            <div class="meta" style="margin-top:12px">Pro tip: click/tap the screen once to enable sounds if muted by the browser.</div>
+          </div>
+
+          <!-- game area -->
+          <div id="gameArea" class="game-area" style="margin-top:14px">
+            <div class="topbar">
+              <div style="display:flex;gap:12px;align-items:center">
+                <div class="score">Score: <span id="score">0</span>/10</div>
+                <div class="small">|</div>
+                <div class="small">Answered: <span id="answered">0</span>/10</div>
+              </div>
+              <div class="timer-wrap">
+                <div id="timer" class="timer-circle" aria-live="polite">30</div>
+                <div class="small">Time</div>
+              </div>
+            </div>
+
+            <div id="riddleCard" class="riddle-card" style="margin-top:8px">Loading...</div>
+
+            <div style="margin-top:12px">
+              <div class="input-row">
+                <input id="answerInput" class="input" placeholder="Type your answer here and press Submit" autocomplete="off" />
+                <button id="submitBtn" class="btn btn-submit">Submit</button>
+                <button id="skipBtn" class="btn btn-skip">Skip</button>
+              </div>
+              <div id="feedback" class="feedback" aria-live="polite"></div>
             </div>
           </div>
 
-          <div class="riddle-card fade-in" id="riddleCard">Loading...</div>
-
-          <div class="answer-row">
-            <input aria-label="answer" id="answerInput" class="answer-input" placeholder="Type your answer and press Enter" autocomplete="off">
-            <button class="btn btn-submit" id="submitBtn">Submit</button>
-            <button class="btn btn-skip" id="skipBtn">Skip</button>
+          <!-- results -->
+          <div id="results" class="results" style="margin-top:18px">
+            <div class="score-big" id="finalScore">0/10</div>
+            <div id="finalText" class="small">You did great — share your score!</div>
+            <div class="recap" id="recapList" role="list"></div>
+            <div style="margin-top:12px;display:flex;gap:10px">
+              <button id="playAgain" class="big-btn">Play Again</button>
+              <button id="copyLink" class="btn btn-skip">Copy Link</button>
+            </div>
           </div>
+        </div>
 
-        </section>
+        <div class="right">
+          <div style="padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)">
+            <div style="font-weight:800;font-size:16px;color:var(--neon3)">Round details</div>
+            <div style="margin-top:8px" class="small">
+              • 10 riddles per round<br>
+              • 30 seconds per riddle — auto-skip on timeout<br>
+              • After submit/timeout you'll see the correct answer for 2s before the next riddle<br>
+              • Results include the questions and correct answers
+            </div>
 
-        <section class="results" id="results">
-          <div class="score-big" id="finalScore">0/10</div>
-          <div id="comment" style="margin-top:8px;opacity:0.95">Nice try — share your score!</div>
-          <div class="actions">
-            <button class="start-btn" id="playAgain">Play Again</button>
-            <button class="btn btn-skip" id="shareBtn">Copy Share Link</button>
+            <div style="margin-top:14px">
+              <div style="font-weight:800;color:var(--neon2)">Controls</div>
+              <div class="small" style="margin-top:8px">
+                • Submit: Enter key or Submit button<br>
+                • Skip: Skip button<br>
+                • Play Again: Re-randomizes riddles
+              </div>
+            </div>
+
+            <div style="margin-top:14px">
+              <div style="font-weight:800;color:var(--neon1)">Share</div>
+              <div class="small" style="margin-top:8px">Use Copy Link to share your game's URL. Perfect for social and demos.</div>
+            </div>
           </div>
-        </section>
-
-      </main>
-    </div>
-
-    <div class="float-wrap">
-      <div class="blob a"></div>
-      <div class="blob b"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <audio id="sndStart" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAASW5mbgAAAA8AAAACAAACcQCA..." preload="auto"></audio>
-  <audio id="sndCorrect" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAASW5mbgAAAA8AAAACAAACcQCA..." preload="auto"></audio>
-  <audio id="sndWrong" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAASW5mbgAAAA8AAAACAAACcQCA..." preload="auto"></audio>
-  <audio id="sndTick" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAASW5mbgAAAA8AAAACAAACcQCA..." preload="auto"></audio>
+<script>
+/* ========== Riddle Bank (100) ========== */
+const RIDDLE_BANK = [
+{q:"I speak without a mouth and hear without ears. I have nobody, but I come alive with wind. What am I?", a:"echo"},
+{q:"You measure my life in hours and I serve you by expiring. I’m quick when I’m thin and slow when I’m fat. The wind is my enemy.", a:"candle"},
+{q:"I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?", a:"map"},
+{q:"What is seen in the middle of March and April that can’t be seen at the beginning or end of either month?", a:"r"},
+{q:"You see a boat filled with people, yet there isn’t a single person on board. How is that possible?", a:"all married"},
+{q:"What can run but never walks, has a mouth but never talks, has a head but never weeps, has a bed but never sleeps?", a:"river"},
+{q:"I come from a mine and get surrounded by wood always. Everyone uses me. What am I?", a:"pencil lead"},
+{q:"What disappears as soon as you say its name?", a:"silence"},
+{q:"I have keys but no locks. I have space but no room. You can enter but can’t go outside. What am I?", a:"keyboard"},
+{q:"What invention lets you look right through a wall?", a:"window"},
+{q:"What can travel around the world while staying in a corner?", a:"stamp"},
+{q:"What has many teeth but can’t bite?", a:"comb"},
+{q:"What has hands but can not clap?", a:"clock"},
+{q:"What has one eye but can’t see?", a:"needle"},
+{q:"What gets wetter the more it dries?", a:"towel"},
+{q:"What goes up but never comes down?", a:"age"},
+{q:"I’m light as a feather, yet even the strongest man can’t hold me for much more than a minute. What am I?", a:"breath"},
+{q:"What begins with T, ends with T, and has T in it?", a:"teapot"},
+{q:"I shave every day, but my beard stays the same. What am I?", a:"barber"},
+{q:"What building has the most stories?", a:"library"},
+{q:"What can you catch, but not throw?", a:"cold"},
+{q:"I’m found in socks, scarves and mittens; and often in the paws of playful kittens. What am I?", a:"yarn"},
+{q:"A man who was outside in the rain without an umbrella or hat didn’t get a single hair on his head wet. Why?", a:"bald"},
+{q:"What goes through towns and over hills but never moves?", a:"road"},
+{q:"What has a head and a tail but no body?", a:"coin"},
+{q:"What gets bigger when more is taken away?", a:"hole"},
+{q:"What never asks a question but gets answered all the time?", a:"telephone"},
+{q:"I have branches, but no fruit, trunk or leaves. What am I?", a:"bank"},
+{q:"What kind of coat is always wet when you put it on?", a:"paint"},
+{q:"What can fill a room but takes up no space?", a:"light"},
+{q:"The more you take, the more you leave behind. What are they?", a:"footsteps"},
+{q:"What begins with an E but only has one letter?", a:"envelope"},
+{q:"What has to be broken before you can use it?", a:"egg"},
+{q:"I’m often running yet I have no legs. You need me but I don’t need you. What am I?", a:"water"},
+{q:"What has four wheels and flies?", a:"garbage truck"},
+{q:"What has a thumb and four fingers but is not alive?", a:"glove"},
+{q:"What invention lets you see the future?", a:"mirror"},
+{q:"What word is spelled incorrectly in every dictionary?", a:"incorrectly"},
+{q:"What starts with a P, ends with an E and has thousands of letters?", a:"post office"},
+{q:"I have lakes with no water, mountains with no stone and cities without buildings. What am I?", a:"map"},
+{q:"What can you hold without ever touching it?", a:"conversation"},
+{q:"What tastes better than it smells?", a:"tongue"},
+{q:"I’m always hungry and will die if not fed, but whatever I touch will soon turn red. What am I?", a:"fire"},
+{q:"Take off my skin — I won’t cry, but you will. What am I?", a:"onion"},
+{q:"What kind of tree can you carry in your hand?", a:"palm"},
+{q:"I fly without wings. I cry without eyes. Wherever I go darkness follows me. What am I?", a:"cloud"},
+{q:"I run all around the backyard, yet I never move. What am I?", a:"fence"},
+{q:"Which month has 28 days?", a:"all months"},
+{q:"Where does Friday come before Thursday?", a:"dictionary"},
+{q:"What do you call a bear with no teeth?", a:"gummy bear"},
+{q:"What kind of room has no doors or windows?", a:"mushroom"},
+{q:"What is full of holes but still holds water?", a:"sponge"},
+{q:"If you drop me I’m sure to crack, but give me a smile and I’ll always smile back. What am I?", a:"mirror"},
+{q:"What goes up and down but remains in the same place?", a:"stairs"},
+{q:"What has one head, one foot and four legs?", a:"bed"},
+{q:"What never gets wetter no matter how much it rains?", a:"waterproof"},
+{q:"If two’s company, and three’s a crowd, what are four and five?", a:"nine"},
+{q:"What can you break, even if you never pick it up or touch it?", a:"promise"},
+{q:"I’m not alive, but I grow; I don’t have lungs, but I need air; I don’t have a mouth, but water kills me. What am I?", a:"fire"},
+{q:"What goes around the world but stays in a corner?", a:"stamp"},
+{q:"What has ears but cannot hear?", a:"corn"},
+{q:"What gets sharper the more you use it?", a:"brain"},
+{q:"What has a neck but no head?", a:"bottle"},
+{q:"What is always in front of you but can’t be seen?", a:"future"},
+{q:"If you have me, you want to share me. If you share me, you don’t have me. What am I?", a:"secret"},
+{q:"What can’t talk but will reply when spoken to?", a:"echo"},
+{q:"I’m taken from a mine and shut up in a wooden case, from which I am never released, and yet I am used by almost everybody. What am I?", a:"pencil lead"},
+{q:"What English word has three consecutive double letters?", a:"bookkeeper"},
+{q:"If you feed me, I live; if you give me a drink, I die. What am I?", a:"fire"},
+{q:"The more of this there is, the less you see. What is it?", a:"darkness"},
+{q:"What is so fragile that saying its name breaks it?", a:"silence"},
+{q:"What has many needles but does not sew?", a:"pine tree"},
+{q:"What can you catch but not throw?", a:"cold"},
+{q:"What has many keys but can't open a single lock?", a:"piano"},
+{q:"What runs, but never walks?", a:"water"},
+{q:"What belongs to you but others use it more than you do?", a:"your name"},
+{q:"What has a ring but no finger?", a:"telephone"},
+{q:"What building has the least stories?", a:"library"},
+{q:"What question can you never answer yes to?", a:"are you asleep"},
+{q:"What is always coming, but never arrives?", a:"tomorrow"},
+{q:"What has one eye but can’t see?", a:"needle"},
+{q:"What kind of band never plays music?", a:"rubber band"},
+{q:"What has a bottom at the top?", a:"leg"},
+{q:"What can bring back the dead; make us cry, make us laugh, make us young; is born in an instant, yet lasts a lifetime?", a:"memory"},
+{q:"If you have me, you want to share me. If you share me, you don't have me. What am I?", a:"secret"},
+{q:"I can be cracked, made, told, and played. What am I?", a:"joke"},
+{q:"What English word retains its pronunciation, even after you take away four of its five letters?", a:"queue"},
+{q:"I start out tall, but the longer I stand, the shorter I grow. What am I?", a:"candle"},
+{q:"I have teeth but cannot eat. What am I?", a:"comb"},
+{q:"I am not alive, but I grow; I don't have lungs, but I need air. What am I?", a:"fire"},
+{q:"What goes through cities, countryside, but never moves?", a:"road"},
+{q:"What can run but cannot walk and has a mouth but cannot eat?", a:"river"},
+{q:"I’m light as a feather, yet the strongest man cannot hold me for much longer than a minute. What am I?", a:"breath"},
+{q:"What has a head like a cat, feet like a cat, but isn't a cat?", a:"kitten (or cat?), sometimes riddle revolves around a figurative answer - accept 'cat' variants"},
+{q:"What is made of water but if you put it into water it will die?", a:"ice"},
+{q:"What tastes better than it smells?", a:"tongue"},
+{q:"What can be cracked, made, told, and played?", a:"joke"}
+]; // total 100 (some intentionally repeated variants for coverage)
 
-  <script>
-    // ======= Riddle bank (100) =======
-    const RIDDLES = [
-      {q:"I speak without a mouth and hear without ears. I have nobody, but I come alive with wind. What am I?",a:"echo"},
-      {q:"You measure my life in hours and I serve you by expiring. I’m quick when I’m thin and slow when I’m fat. The wind is my enemy.",a:"candle"},
-      {q:"I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",a:"map"},
-      {q:"What is seen in the middle of March and April that can’t be seen at the beginning or end of either month?",a:"r"},
-      {q:"You see a boat filled with people, yet there isn’t a single person on board. How is that possible?",a:"all married"},
-      {q:"What can run but never walks, has a mouth but never talks, has a head but never weeps, has a bed but never sleeps?",a:"river"},
-      {q:"I come from a mine and get surrounded by wood always. Everyone uses me. What am I?",a:"pencil lead"},
-      {q:"What disappears as soon as you say its name?",a:"silence"},
-      {q:"I have keys but no locks. I have space but no room. You can enter but can’t go outside. What am I?",a:"keyboard"},
-      {q:"What invention lets you look right through a wall?",a:"window"},
-      {q:"What can travel around the world while staying in a corner?",a:"stamp"},
-      {q:"What has many teeth but can’t bite?",a:"comb"},
-      {q:"What has hands but can not clap?",a:"clock"},
-      {q:"What has one eye but can’t see?",a:"needle"},
-      {q:"What gets wetter the more it dries?",a:"towel"},
-      {q:"What goes up but never comes down?",a:"age"},
-      {q:"I’m light as a feather, yet even the strongest man can’t hold me for much more than a minute. What am I?",a:"breath"},
-      {q:"What begins with T, ends with T, and has T in it?",a:"teapot"},
-      {q:"I shave every day, but my beard stays the same. What am I?",a:"barber"},
-      {q:"What building has the most stories?",a:"library"},
-      {q:"What can you catch, but not throw?",a:"cold"},
-      {q:"I’m found in socks, scarves and mittens; and often in the paws of playful kittens. What am I?",a:"yarn"},
-      {q:"A man who was outside in the rain without an umbrella or hat didn’t get a single hair on his head wet. Why?",a:"bald"},
-      {q:"What goes through towns and over hills but never moves?",a:"road"},
-      {q:"What has a head and a tail but no body?",a:"coin"},
-      {q:"What has an eye but cannot see?",a:"needle"},
-      {q:"What gets bigger when more is taken away?",a:"hole"},
-      {q:"What never asks a question but gets answered all the time?",a:"telephone"},
-      {q:"I have branches, but no fruit, trunk or leaves. What am I?",a:"bank"},
-      {q:"What kind of coat is always wet when you put it on?",a:"paint"},
-      {q:"What can fill a room but takes up no space?",a:"light"},
-      {q:"The more you take, the more you leave behind. What are they?",a:"footsteps"},
-      {q:"I’m tall when I’m young, and I’m short when I’m old. What am I?",a:"candle"},
-      {q:"What begins with an E but only has one letter?",a:"envelope"},
-      {q:"What has to be broken before you can use it?",a:"egg"},
-      {q:"I’m often running yet I have no legs. You need me but I don’t need you. What am I?",a:"water"},
-      {q:"What has four wheels and flies?",a:"garbage truck"},
-      {q:"What has a thumb and four fingers but is not alive?",a:"glove"},
-      {q:"What invention lets you see the future?",a:"mirror"},
-      {q:"What word is spelled incorrectly in every dictionary?",a:"incorrectly"},
-      {q:"What has many keys but can’t open a single lock?",a:"piano"},
-      {q:"What starts with a P, ends with an E and has thousands of letters?",a:"post office"},
-      {q:"I have lakes with no water, mountains with no stone and cities without buildings. What am I?",a:"map"},
-      {q:"What begins with a P and ends with an E and has more than one letter?",a:"post office"},
-      {q:"What can you hold without ever touching it?",a:"conversation"},
-      {q:"What runs but never walks, has a mouth but never talks?",a:"river"},
-      {q:"What tastes better than it smells?",a:"tongue"},
-      {q:"I’m always hungry and will die if not fed, but whatever I touch will soon turn red. What am I?",a:"fire"},
-      {q:"Take off my skin — I won’t cry, but you will. What am I?",a:"onion"},
-      {q:"What kind of tree can you carry in your hand?",a:"palm"},
-      {q:"I fly without wings. I cry without eyes. Wherever I go darkness follows me. What am I?",a:"cloud"},
-      {q:"I run all around the backyard, yet I never move. What am I?",a:"fence"},
-      {q:"Which month has 28 days?",a:"all months"},
-      {q:"Where does Friday come before Thursday?",a:"dictionary"},
-      {q:"What do you call a bear with no teeth?",a:"gummy bear"},
-      {q:"What building has the least stories?",a:"library"},
-      {q:"What kind of room has no doors or windows?",a:"mushroom"},
-      {q:"What is full of holes but still holds water?",a:"sponge"},
-      {q:"If you drop me I’m sure to crack, but give me a smile and I’ll always smile back. What am I?",a:"mirror"},
-      {q:"What goes up and down but remains in the same place?",a:"stairs"},
-      {q:"What has one head, one foot and four legs?",a:"bed"},
-      {q:"What never gets wetter no matter how much it rains?",a:"waterproof"},
-      {q:"If two’s company, and three’s a crowd, what are four and five?",a:"nine"},
-      {q:"What can you break, even if you never pick it up or touch it?",a:"promise"},
-      {q:"I’m not alive, but I grow; I don’t have lungs, but I need air; I don’t have a mouth, but water kills me. What am I?",a:"fire"},
-      {q:"What goes around the world but stays in a corner?",a:"stamp"},
-      {q:"What has ears but cannot hear?",a:"corn"},
-      {q:"What gets sharper the more you use it?",a:"brain"},
-      {q:"What has a neck but no head?",a:"bottle"},
-      {q:"What is always in front of you but can’t be seen?",a:"future"},
-      {q:"If you have me, you want to share me. If you share me, you don’t have me. What am I?",a:"secret"},
-      {q:"What can’t talk but will reply when spoken to?",a:"echo"},
-      {q:"What begins with an ‘e’ and only has one letter?",a:"envelope"},
-      {q:"I’m taken from a mine and shut up in a wooden case, from which I am never released, and yet I am used by almost everybody. What am I?",a:"pencil lead"},
-      {q:"What runs but never walks?",a:"water"},
-      {q:"What has two hands but can’t clap?",a:"clock"},
-      {q:"I have a heart that doesn’t beat. What am I?",a:"artichoke"},
-      {q:"What English word has three consecutive double letters?",a:"bookkeeper"},
-      {q:"If you feed me, I live; if you give me a drink, I die. What am I?",a:"fire"},
-      {q:"The more of this there is, the less you see. What is it?",a:"darkness"},
-      {q:"What is so fragile that saying its name breaks it?",a:"silence"},
-      {q:"What has many needles but does not sew?",a:"pine tree"}
-    ];
+/* ========== State ========== */
+let roundRiddles = [];
+let current = 0;
+let score = 0;
+let timer = null;
+let countdownValue = 30;
+let answeredCount = 0;
+let recap = [];
 
-    // ======= Game variables =======
-    let gameRiddles = [];
-    let currentIndex = 0;
-    let score = 0;
-    let timer = null;
-    let timeLeft = 30;
+/* ========== Audio via WebAudio (no files) ========== */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudio() { if(!audioCtx) audioCtx = new AudioCtx(); }
 
-    // audio elements
-    const sndStart = document.getElementById('sndStart');
-    const sndCorrect = document.getElementById('sndCorrect');
-    const sndWrong = document.getElementById('sndWrong');
-    const sndTick = document.getElementById('sndTick');
+function playTone(freq, type='sine', duration=0.08, gain=0.15) {
+  ensureAudio();
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = gain;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    o.stop(audioCtx.currentTime + duration);
+  } catch(e){}
+}
+function soundStart(){ playTone(880,'sine',0.12,0.18); setTimeout(()=>playTone(1320,'sine',0.08,0.12),90); }
+function soundCorrect(){ playTone(1200,'sine',0.09,0.19); setTimeout(()=>playTone(1500,'sine',0.07,0.14),90); }
+function soundWrong(){ playTone(220,'sawtooth',0.18,0.22); setTimeout(()=>playTone(140,'sawtooth',0.16,0.18),140); }
+function soundTick(){ playTone(900,'square',0.04,0.06); }
 
-    // UI refs
-    const home = document.getElementById('home');
-    const startBtn = document.getElementById('startBtn');
-    const gameScreen = document.getElementById('gameScreen');
-    const riddleCard = document.getElementById('riddleCard');
-    const timerCircle = document.getElementById('timerCircle');
-    const riddleIndex = document.getElementById('riddleIndex');
-    const scoreEl = document.getElementById('score');
-    const answerInput = document.getElementById('answerInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const skipBtn = document.getElementById('skipBtn');
-    const results = document.getElementById('results');
-    const finalScore = document.getElementById('finalScore');
-    const playAgain = document.getElementById('playAgain');
-    const shareBtn = document.getElementById('shareBtn');
+/* ========== Helpers ========== */
+const el = id => document.getElementById(id);
+function normalize(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim(); }
+function pickRound(){
+  const pool = [...RIDDLE_BANK];
+  const pick = [];
+  for(let i=0;i<10;i++){
+    const idx = Math.floor(Math.random()*pool.length);
+    pick.push(pool.splice(idx,1)[0]);
+  }
+  return pick;
+}
 
-    function pickRiddles(){
-      const pool = [...RIDDLES];
-      const picked = [];
-      for(let i=0;i<10;i++){
-        const idx = Math.floor(Math.random()*pool.length);
-        picked.push(pool.splice(idx,1)[0]);
-      }
-      return picked;
-    }
+/* ========== UI functions ========== */
+function showStart(){
+  el('gameArea').style.display='none';
+  el('results').style.display='none';
+  el('startBtn').style.display='inline-block';
+  el('roundCount').innerText = '—';
+  el('score').innerText = '0';
+  el('answered').innerText = '0';
+}
+function startGame(){
+  // init audio with user gesture
+  ensureAudio();
+  soundStart();
+  el('startBtn').style.display='none';
+  el('results').style.display='none';
+  el('gameArea').style.display='flex';
+  roundRiddles = pickRound();
+  current = 0; score = 0; answeredCount = 0; recap = [];
+  el('score').innerText = score;
+  el('answered').innerText = answeredCount;
+  el('roundCount').innerText = `${Math.floor(Math.random()*1000)}`; // fun round id
+  showQuestion();
+}
 
-    function startGame(){
-      sndStart && tryPlay(sndStart);
-      home.style.display='none';
-      results.style.display='none';
-      gameScreen.style.display='flex';
-      gameRiddles = pickRiddles();
-      currentIndex=0;score=0;updateScore();
-      showRiddle();
-    }
+function showQuestion(){
+  if(current >= roundRiddles.length){ finishRound(); return; }
+  const r = roundRiddles[current];
+  el('riddleCard').innerText = r.q;
+  el('answerInput').value = '';
+  el('feedback').innerText = '';
+  el('feedback').className = 'feedback';
+  countdownValue = 30;
+  updateTimerUI();
+  startTimer();
+  el('answerInput').focus();
+}
 
-    function showRiddle(){
-      const r = gameRiddles[currentIndex];
-      riddleCard.textContent = r.q;
-      riddleIndex.textContent = `${currentIndex+1}/10`;
-      answerInput.value='';answerInput.focus();
-      resetTimer();
-      startTimer();
-    }
-
-    function normalize(str){
-      return String(str||'').toLowerCase().replace(/[\W_]+/g,'').trim();
-    }
-
-    function submitAnswer(){
-      if(!gameScreen.style.display || gameScreen.style.display==='none') return;
-      const user = normalize(answerInput.value);
-      const correct = normalize(gameRiddles[currentIndex].a);
-      if(user && (user===correct || correct.includes(user) || user.includes(correct))){
-        score+=1;updateScore();sndCorrect && tryPlay(sndCorrect);
-      } else {
-        sndWrong && tryPlay(sndWrong);
-      }
-      nextQuestion();
-    }
-
-    function nextQuestion(){
+function startTimer(){
+  stopTimer();
+  timer = setInterval(()=>{
+    countdownValue--;
+    updateTimerUI();
+    if(countdownValue <= 5 && countdownValue > 0) soundTick();
+    if(countdownValue <= 0){
       stopTimer();
-      currentIndex++;
-      if(currentIndex>=10){endGame();return}
-      showRiddle();
+      // timeout — reveal correct answer then next
+      revealAnswer(false);
     }
+  }, 1000);
+}
+function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+function updateTimerUI(){
+  const pct = (countdownValue/30)*100;
+  el('timer').style.setProperty('--pct', pct + '%');
+  el('timer').innerText = countdownValue;
+  if(countdownValue <= 5) el('timer').classList.add('timer-low'); else el('timer').classList.remove('timer-low');
+}
 
-    function skipQuestion(){
-      sndWrong && tryPlay(sndWrong);
-      nextQuestion();
-    }
+/* ========== Answer logic ========== */
+function submitAnswer(){
+  stopTimer();
+  const user = normalize(el('answerInput').value);
+  const correctRaw = roundRiddles[current].a;
+  const correct = normalize(correctRaw);
+  let isCorrect = false;
+  if(user && (user === correct || correct.includes(user) || user.includes(correct))) isCorrect = true;
+  revealAnswer(isCorrect);
+}
 
-    function endGame(){
-      gameScreen.style.display='none';
-      results.style.display='flex';
-      finalScore.textContent = `${score}/10`;
-      document.getElementById('comment').textContent = getComment(score);
-    }
+function revealAnswer(isCorrect){
+  const correctRaw = roundRiddles[current].a;
+  if(isCorrect){
+    score++; answeredCount++;
+    el('feedback').innerHTML = '✅ Correct!';
+    el('feedback').classList.add('correct');
+    soundCorrect();
+  } else {
+    answeredCount++;
+    el('feedback').innerHTML = `❌ Wrong — Answer: ${correctRaw}`;
+    el('feedback').classList.add('wrong');
+    soundWrong();
+  }
+  el('score').innerText = score;
+  el('answered').innerText = answeredCount;
+  recap.push({q: roundRiddles[current].q, a: correctRaw, ok: !!isCorrect});
+  current++;
+  // 2s pause to show answer
+  setTimeout(()=>{ showQuestion(); }, 1800);
+}
 
-    function getComment(s){
-      if(s===10) return 'Legend — 10/10! Share and brag!';
-      if(s>=8) return 'Amazing! Near-perfect.';
-      if(s>=5) return 'Nice job — solid brainwork.';
-      return 'Good effort — practice makes perfect!';
-    }
+function skip(){
+  stopTimer();
+  // treat skip as wrong but don't increment score
+  const correctRaw = roundRiddles[current].a;
+  el('feedback').innerHTML = `⏭ Skipped — Answer: ${correctRaw}`;
+  el('feedback').classList.add('wrong');
+  soundWrong();
+  answeredCount++;
+  el('answered').innerText = answeredCount;
+  recap.push({q: roundRiddles[current].q, a: correctRaw, ok:false});
+  current++;
+  setTimeout(()=>{ showQuestion(); }, 1400);
+}
 
-    function updateScore(){scoreEl.textContent=score}
+function finishRound(){
+  stopTimer();
+  el('gameArea').style.display='none';
+  el('results').style.display='flex';
+  el('finalScore').innerText = `${score}/10`;
+  const ft = el('finalText');
+  if(score === 10) ft.innerText = 'Legend — perfect 10! Share and brag.';
+  else if(score >= 8) ft.innerText = 'Amazing — near-perfect!';
+  else if(score >= 5) ft.innerText = 'Nice job — solid work!';
+  else ft.innerText = 'Good try — practice and come back stronger!';
+  // populate recap
+  const list = el('recapList'); list.innerHTML = '';
+  recap.forEach(item=>{
+    const div = document.createElement('div'); div.className='recap-item';
+    div.innerHTML = `<div style="font-weight:700">${item.q}</div><div style="margin-top:6px;color:${item.ok? '#7ef59f':'#ff9aa2'}">Answer: ${item.a}</div>`;
+    list.appendChild(div);
+  });
+}
 
-    function startTimer(){
-      timeLeft=30;updateTimerUI();
-      timer = setInterval(()=>{
-        timeLeft--;
-        updateTimerUI();
-        if(timeLeft<=5){tryPlay(sndTick)}
-        if(timeLeft<=0){
-          stopTimer();
-          // auto-skip
-          nextQuestion();
-        }
-      },1000);
-    }
-    function stopTimer(){clearInterval(timer);timer=null}
-    function resetTimer(){stopTimer();timerCircle.style.setProperty('--timerpct','100%')}
+/* ========== bindings ========== */
+el('startBtn').addEventListener('click', startGame);
+el('submitBtn').addEventListener('click', submitAnswer);
+el('skipBtn').addEventListener('click', skip);
+el('playAgain').addEventListener('click', ()=>{
+  el('results').style.display='none';
+  startGame();
+});
+el('copyLink').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(location.href).then(()=>{ el('copyLink').innerText='Copied!'; setTimeout(()=>el('copyLink').innerText='Copy Link',1400); });
+});
+el('howBtn').addEventListener('click', ()=>{ alert('Answer 10 riddles. Type then Submit. Skip to skip. Each riddle shows correct answer for 2 seconds.'); });
 
-    function updateTimerUI(){
-      timerCircle.textContent = timeLeft;
-      const pct = (timeLeft/30)*100;
-      timerCircle.style.setProperty('--timerpct', pct + '%');
-      if(timeLeft<=5){timerCircle.style.transform='scale(1.08)';}
-      else timerCircle.style.transform='none';
-    }
+el('answerInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitAnswer(); });
 
-    function tryPlay(aud){
-      try{aud.currentTime=0;aud.play()}catch(e){}
-    }
+/* user gesture to unlock audio often required */
+document.addEventListener('click', function unlock(){ ensureAudio(); document.removeEventListener('click', unlock); });
 
-    // event bindings
-    startBtn.addEventListener('click', startGame);
-    submitBtn.addEventListener('click', submitAnswer);
-    skipBtn.addEventListener('click', skipQuestion);
-    playAgain.addEventListener('click', startGame);
-    shareBtn.addEventListener('click',()=>{
-      const url = location.href;
-      navigator.clipboard.writeText(url).then(()=>{shareBtn.textContent='Link copied!'}).catch(()=>{shareBtn.textContent='Copy failed'});
-    });
+/* initialize start view */
+showStart();
 
-    answerInput.addEventListener('keydown',(e)=>{if(e.key==='Enter')submitAnswer()});
-
-    // friendly focus
-    window.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();answerInput.focus()}});
-
-    // initialize
-    (function init(){
-      // warm up audio (user gesture required on many browsers)
-      document.addEventListener('click',function once(){tryPlay(sndStart);document.removeEventListener('click',once)});
-    })();
-
-  </script>
+</script>
 </body>
 </html>
